@@ -1,74 +1,80 @@
 var express = require('express');
 var router = express.Router();
+var winston = require('winston');
 var Teacher= require('../models/teacher');
-/*var autoIncrement = require('mongoose-auto-increment');
 
+/*Logger*/
+winston.add(
+  winston.transports.File,{
+    filename: 'teacher.log',
+    level: 'info',
+    json: 'true',
+    eol: 'rn',
+    timestamp: true
+  }
+)
+winston.log('info',"Info level")
 
-Teacher.plugin(autoIncrement.plugin, {
-    model: 'teacher',
-    field: 'Teacher_Id',
-    startAt: 100,
-    incrementBy: 1
-});*/
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-/* Get all records*/
+/* Get all teacher records*/
 router.get('/fetch', function(req, res, next) {
+  winston.log('info',"Info: Get all records")
   console.log("info");
   Teacher.find({},function(err,data){
       if(err)
-      res.send(err);
+      res.status(500).send(err);
       else {
-        res.json(data);
+        res.status(200).json(data);
       }
-  });
+  })
 });
 
 /* Get teachers details of a particular school */
 router.get('/getteachers/:School_Id',function(req,res,next){
+  winston.log('info',"Info: Get teachers from particular school")
   Teacher.find({School_Id: req.params.School_Id},function(err,data){
     if(err)
-    res.send(err);
+    res.status(500).send(err);
     else {
-      res.json(data);
+      res.status(200).json(data);
     }
-  })
+  }).catch(next);
 })
 
 /*Get particular teacher details using school and teacher Id */
 router.get('/getteacher/:School_Id/:Teacher_Id',function(req,res,next){
+  winston.log('info',"Info: Get particular teacher details")
   Teacher.find({School_Id: req.params.School_Id,Teacher_Id:req.params.Teacher_Id},function(err,data){
+
     if(err)
-    res.send(err);
+    res.status(500).send(err);
     else {
-      res.json(data);
+      res.status(200).json(data);
     }
-  })
+  }).catch(next);
 })
 
 /* Delete  a particular teacher details */
-router.get('/delete/:School_Id/:Teacher_Id',function(req,res,next){
+router.get('/delete/:School_Id/:Teacher_Id',function(err,req,res,next){
+  winston.log('info',"Info: Delete particular teacher")
   Teacher.remove({School_Id: req.params.School_Id,Teacher_Id:req.params.Teacher_Id},function(err,data){
     console.log('deleted');
-    res.json(data);
-  })
+    if(err)
+    res.status(404).send(err);
+    else
+    res.status(204).json(data);
+  }).catch(next);
 })
 
-/*router.get('/del/:School_Id', function(req,res,next){
-  var query = {School_Id: req.params.School_Id,
-               Teacher_Id:req.params.Teacher_Id};
-  Teacher.remove(query,function(err){
-    res.send("deleted")
-  })
-})
-*/
 
 /* Add teachers */
-router.post('/add',function(req,res,next){
+router.post('/add',function(err,req,res,next){
+  winston.log('info',"Info level")
   var t=new Teacher({
     School_Id:req.body.School_Id,
     Teacher_Id:1,
@@ -77,7 +83,7 @@ router.post('/add',function(req,res,next){
     Date_of_birth:req.body.Date_of_birth,
     Age: req.body.Age,
     Qualification:  req.body.Qualification,
-    Expreience: req.body.Experience,
+    Experience: req.body.Experience,
     Package: req.body.Package,
     Address:req.body.Address,
     Phone_Number:  req.body.Phone_Number,
@@ -91,9 +97,9 @@ router.post('/add',function(req,res,next){
 
         var sc="T"+count++
         Teacher.findOneAndUpdate({_id:suc.id}, {Teacher_Id:sc}, {upsert:true}, function(err, doc){
-    if (err) return res.send(500, { error: err });
-    return res.send("succesfully saved");
-});
+    if (err) return res.status(500).send( { error: err });
+    return res.status(201).send({"Message":"Created", type:"internal"});
+}).catch(next);;
 
 })
     //  res.send(suc)
@@ -107,12 +113,8 @@ router.post('/add',function(req,res,next){
        );
    return sequenceDocument.sequence_value;
  }
-  /*  t.nextCount(function(err, count) {
 
-             // count === 1 -> true
-
-         }); */
-  })
+})
 
 })
 
@@ -120,44 +122,17 @@ router.post('/add',function(req,res,next){
 
 /* Update particular teacher details */
 router.put('/update/:School_Id/:Teacher_Id', function(req,res,next){
+  winston.log('info',"Info level")
 var query={School_Id: req.params.School_Id,
              Teacher_Id:req.params.Teacher_Id};
       Teacher.update(query, req.body, function(err,data){
-                   if(err) res.json(err);
+                   if(err) res.status(404).json(err);
                    else {
-                     res.json(data)
+                     res.status(202).json(data)
                    }
 
-  })
+  }).catch(next);
 })
-
-
-
-/*router.put('/update1/:School_Id/:Teacher_Id', function(req,res,next){
- var query = {School_Id: req.params.School_Id,
-               Teacher_Id:req.params.Teacher_Id};
-      var update={
-        School_Id:req.body.School_Id,
-        Teacher_Id:req.body.Teacher_Id,
-        First_Name: req.body.First_Name,
-        Last_Name: req.body.Last_Name,
-        Date_of_birth:req.body.Date_of_birth,
-        Age: req.body.Age,
-        Qualification:  req.body.Qualification,
-        Expreience: req.body.Experience,
-        Package: req.body.Package,
-        Address:req.body.Address,
-        Phone_Number:  req.body.Phone_Number,
-      }
-
-      Teacher.findOneAndUpdate(query,update,function(err,data){
-       if(err) res.json(err);
-       else {
-         res.json("data")
-       }
-)
-})
-*/
 
   /*
   Teacher.save(function(err,value){
@@ -179,10 +154,5 @@ var query={School_Id: req.params.School_Id,
     res.send(err);
   }
 */
-
-
-
-
-
 
 module.exports = router;

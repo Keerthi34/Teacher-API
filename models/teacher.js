@@ -3,25 +3,21 @@ var autoIncrement = require('mongoose-auto-increment');
 var AutoIncrement = require('mongoose-sequence')(mongoose);
 var Schema = mongoose.Schema;
 
-//schema.plugin(AutoIncrement, {inc_field: 'id'});
+
 var schema= new Schema({
     "School_Id" : {type:String},
     "Teacher_Id":{type:String},
-    "First_Name": {type:String},
-    "Last_Name": {type:String},
+    "First_Name": {type:String, required:true},
+    "Last_Name": {type:String, required:true},
     "Date_of_birth": {type:String},
-    "Age": {type:String},
-    "Qualification": {type:String},
-    "Expreience": {type:String},
-    "Package": {type:String},
-     "Address":{type:String},
-    "Phone_Number":  {type:String},
+    "Age": {type:Number},
+    "Qualification": {type:String, required:true},
+    "Experience": {type:String, required:true},
+    "Package": {type:String, required:true},
+     "Address":{type:String, required:true},
+    "Phone_Number":  {type:String, required:true},
 
 })
 
 
 module.exports=mongoose.model('teacher_details',schema);
-
-/*autoIncrement.getNextSequence(Teacher, teacher_details, function (err, autoIndex) {
-
-var  = Teacher.collection(teacher_details);*/

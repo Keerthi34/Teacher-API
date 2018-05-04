@@ -7,7 +7,7 @@ var mongoose = require('mongoose');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var Teacher= require('./models/teacher');
-
+var winston =require('winston')
 var app = express();
 
 var tt=mongoose.connect('mongodb://Keerthi:keerthi@ds133166.mlab.com:33166/teacher',function(err,success){
@@ -48,6 +48,13 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+  res.send({error:err});
+  /*res.status(404).send({error:err.message});
+    res.status(500).send({error:err.message});*/
 });
+
+/*app.use(function(err, req, res, next){
+
+})*/
 
 module.exports = app;
